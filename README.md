@@ -13,11 +13,16 @@ datasyncJS works like this :
 2. fill in datasync-server/config.php to say which tables the (JS) app client can fetch and which tables it can store (write) to
 3. run datasync-server/generateClientJS.php to get the JS code to put into your client app (this will be a JayData DB (ie. most supported platforms possible))
 4. in your client app you include datasync-client/datasync.js and the client code from the previous step and you now have access to the datasync object, allowing :
-    
+        
+datasync object is used like this :
     
     datasync.fetch(table, where, success, fail);
     datasync.store(table, where, success, fail);
 
+
+	
+see a full tutorial at datasyncjs.org 	
+	
 
 That's it!
 
