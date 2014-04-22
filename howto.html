@@ -1,0 +1,67 @@
+<html>
+	
+	<head>
+		<title>How to Use datasyncJS</title>
+	
+	
+		<style>
+			
+		</style>
+	</head>
+	
+	<body>
+		
+		<h1>datasyncJS
+			&nbsp;
+			<img src="logo.png" align="center" style="width:100px; height: auto" />
+			</h1>
+		
+		<a href="https://github.com/krisrandall/datasyncJS" target="_blank">download from github</a>
+		
+		<h2>What is datasyncJS for?</h2>
+		<p>
+			datasyncJS is for creating a web-client/mobile app which is able to 
+			fetch data from, and store data to, a web server.
+		</p>
+		<p>
+			There are obviously 2 components, a server DB and the client App.<br/>
+		</p>
+		
+		<h2>Setting up the Server</h2>
+		<p>
+			<ol>
+				<li>The first step is to setup your (MySQL) database on the server </li>
+				<li>Next put the <i>datasync-server</i> direcotry (PHP code) onto the server </li>
+				<li>Set up the config for your DB and your client App in <i>datasync-server/config.php</i> </li>
+			</ol>
+			That's all that needs to be done on the server!
+		</p>
+		
+		<h2>Setting up the Client</h2>
+		<p>
+			<ol>
+				<li>Add the <i>datasync-client</i> directory to your client app</li>
+				<li>On the <b>server</b> run <i>datasync-server/generateClientJS.php</i>, and save
+					the generated code as <i>datasync-client/mydb.js</i> </li>
+				<li>Delete <i>datasync-server/generateClientJS.php</i> if you don't want everyone on the 
+					internet to be able to see your data structure</li>
+			</ol>	
+			Now your client is setup!<br/>
+			You can use datasync in your code:
+			<pre>
+							    
+			    datasync.fetch(table, where, success, fail);
+			    datasync.store(table, where, success, fail);
+
+			</pre>
+		</p>
+		
+		<h2>A full datasyncJS example</h2>
+		<p>
+			TO DO ...	
+		</p>
+		
+		
+	</body>
+	
+</html>
