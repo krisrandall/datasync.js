@@ -2,6 +2,42 @@
 
 
 
+var datasync = {
+	
+	fetch : function (object, table, where, success, fail) {
+		
+		
+		udid = '999999999'; // replace this with the UDID of the device
+		
+		var password = MD5(object['app_key']+udid+table+object['app_key_suffix']);
+		
+		var params = '?table='+table+
+					 '&udid='+udid+
+					 '&application_key='+object['app_key']+
+					 '&application_password='+password+
+					 '&dts='+encodeURIComponent($('#dts').val()) +
+					 '&callback=?';
+			
+		$.getJSON(object['app_url']+'/fetch.php'+params,
+			function(res) {
+				
+				if (typeof res != 'object') {
+					fail({error_text:"non object returned", error_detail:res});
+				}
+				if (res.error) {
+					fail({error_text:"server returned error", error_detail:res.error_text})
+				}
+				
+				// ELSE - load this data into the local DB !
+			
+				// TODO 
+
+			}
+			);
+							
+	}
+	
+}
 
 
 
@@ -240,6 +276,9 @@ var MD5 = function (string) {
  
 	return temp.toLowerCase();
 }
+
+
+
 
 
 
