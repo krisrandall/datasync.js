@@ -18,6 +18,7 @@
 
 
 
+
 function get_client_ip() {
      $ipaddress = '';
      if ($_SERVER['HTTP_CLIENT_IP'])
@@ -77,10 +78,12 @@ if ($success) {
 				SELECT * FROM `{$grandtm_config['table']}`
 				WHERE {$grandtm_config['where_condition']}
 				");
+
+				
 	$results = array();
 	$results['error'] = false;
 	$results['results'] = array();
-	
+
 	while($row=$res->fetch_assoc()) {
 		// NB: rename first table field to 'id' 
 		if ($first_key!='id') {

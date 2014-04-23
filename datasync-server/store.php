@@ -20,7 +20,7 @@ if($db->connect_errno > 0){
 // and set/apply your application_password
 
 extract($_GET);
-if ( in_array($table, $fetchable_tables) ) {
+if ( !in_array($table, $fetchable_tables) ) {
 
 	if ($_REQUEST['callback']!='') {
 		header('Content-type: application/json');

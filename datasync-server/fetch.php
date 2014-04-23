@@ -20,7 +20,7 @@ if($db->connect_errno > 0){
 // and set/apply your application_password
 
 extract($_GET);
-if ( in_array($table, $fetchable_tables) ) {
+if ( !in_array($table, $fetchable_tables) ) {
 
 	if ($_REQUEST['callback']!='') {
 		header('Content-type: application/json');
@@ -43,13 +43,14 @@ $app_pass = md5($app_name.$udid.$table.APP_SECRET_KEY); // this is the same in y
 $grandtm_config['table'] 				= $table;
 $grandtm_config['application_key']		= $app_name;
 $grandtm_config['application_password']	= $app_pass;
-$grandtm_config['where_condition']		= " updatedDTS >= '".mysql_real_escape_string(urldecode($dts))."' ";
+$grandtm_config['where_condition']		= "1"; // " updatedDTS >= '".mysql_real_escape_string(urldecode($dts))."' ";
 
 $grandtm_config['log_table_prefix']		= "datasync"; // 
 
 
 // ** 4 **
 // and the rest is magic
+
 
 require ('grandtm/handlefetchrequest.php');
 
