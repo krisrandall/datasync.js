@@ -12,7 +12,18 @@
 		<script>
 			
 			function yes_func(res) {
-				$('#results').html(res);
+				$('#results').html('');
+				mydb.thedb['t5_checklists'].forEach( function(result) {
+					
+					$('#results').append(result.checklist_id+': '+result.checklist_name+'<br/>');
+					
+					/* all fields * /
+					$.each( result, function (fld, val) {
+						$('#results').append(fld+' = '+val+'<br/>');
+					});
+					*/
+					$('#results').append('<hr/>');
+				});
 			}
 			
 			function no_func(err) {
@@ -24,9 +35,9 @@
 
 	<body>
 		
-		<button onclick="mydb.fetch('MYTABLENAME', '', yes_func, no_func);">Fetch Table</button>	
+		<button onclick="mydb.fetch('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
 		
-		<div id="results"></div>
+		<div id="results">test</div>
 		
 	</body>
 	

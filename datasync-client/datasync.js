@@ -23,15 +23,24 @@ var datasync = {
 				
 				if (typeof res != 'object') {
 					fail({error_text:"non object returned", error_detail:res});
-				}
-				if (res.error) {
+				} else if (res.error) {
 					fail({error_text:"server returned error", error_detail:res.error_text})
+				} else {
+				 
+					// load this data into the local DB !
+					$.each( res.results , function(index, value) {
+
+						var thisrec = window[table];
+						var recObject = new thisrec( value );
+						mydb.thedb[table].attach( recObject );
+console.log(recObject);
+console.log('=-====-==-=-==-==');
+					});	
+					
+					mydb.thedb.saveChanges( { success: function(r) { success(r); }, error: function(e) { fail(e); } } );	
+
 				}
 				
-				// ELSE - load this data into the local DB !
-			
-				// TODO 
-
 			}
 			);
 							

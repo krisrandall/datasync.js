@@ -13,6 +13,9 @@ if($db->connect_errno > 0){
 
 
 
+$client_tables = array_merge( $fetchable_tables , $storeable_tables );
+
+
 ?>
 <pre>
 /**
@@ -24,28 +27,10 @@ if($db->connect_errno > 0){
  *
 **/
 
-
-var mydb = {
-	
-	app_url : '<?php echo "http://". $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']); ?>',
-	app_key : '<?php echo APP_NAME; ?>',
-	app_key_suffix : '<?php echo APP_SECRET_KEY; ?>',
-	
-	fetch : function (table, where, success, fail) {
-		datasync.fetch (this, table, where, success, fail);
-	},
-	
-	store : function (table, where, success, fail) {
-		datasync.store (this, table, where, success, fail);
-	}
-	
-}
-
-
 <?php
 
 // for each of the server-side tables we need, create JayData client equalivalents
-$client_tables = array_merge( $fetchable_tables , $storeable_tables );
+
 
 foreach($client_tables as $t) {
 	
@@ -79,8 +64,9 @@ $data.Entity.extend("'.$t.'", {';
 		switch($type) {
 			case 'varchar':		$type = 'text';		break;
 			case 'tinyint':		$type = 'bool';		break; // this is the only thing i use tinyints for
+			case 'smallint':
+			case 'bigint':
 			case 'mediumint':	$type = 'int';		break;
-			case 'smallint':	$type = 'smallint';	break;
 			
 			// of course there are others !!
 			
@@ -102,7 +88,47 @@ $data.Entity.extend("'.$t.'", {';
 
 }
 
+// records are defined above, now define the DB "MyDB" 
 
+echo '
 
+$data.EntityContext.extend("MyDB", { ';
+$first = true;
+foreach($client_tables as $t) {
+	if ($first) {
+		$first = false;
+	} else {
+		echo ',';
+	}
+	echo '
+	'.$t.': { type: $data.EntitySet, elementType: '.$t.' }';
+}
+echo '
+});
+	';
+	
 ?>
+
+
+
+var mydb = {
+	
+	app_url : '<?php echo "http://". $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']); ?>',
+	app_key : '<?php echo APP_NAME; ?>',
+	app_key_suffix : '<?php echo APP_SECRET_KEY; ?>',
+	
+	thedb : new MyDB("<?php echo APP_NAME; ?>"),
+	
+	fetch : function (table, where, success, fail) {
+		datasync.fetch (this, table, where, success, fail);
+	},
+	
+	store : function (table, where, success, fail) {
+		datasync.store (this, table, where, success, fail);
+	}
+}
+
+
+
 </pre>
+

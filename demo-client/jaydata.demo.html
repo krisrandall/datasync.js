@@ -50,6 +50,7 @@ function dbready(yes) {
 		
 		$('#add').click(function() {
 			// add one
+
 			var emp = new Employee({ FirstName: $('#current').val() });
 			thedb.Employee.add(emp);
 			thedb.saveChanges();
