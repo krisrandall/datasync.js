@@ -4,7 +4,7 @@
 
 var datasync = {
 	
-	fetch : function (object, table, where, success, fail) {
+	fetch : function (object, table, where, func_success, func_fail) {
 		
 		
 		udid = '999999999'; // replace this with the UDID of the device
@@ -22,23 +22,26 @@ var datasync = {
 			function(res) {
 				
 				if (typeof res != 'object') {
-					fail({error_text:"non object returned", error_detail:res});
+					func_fail({error_text:"non object returned", error_detail:res});
 				} else if (res.error) {
-					fail({error_text:"server returned error", error_detail:res.error_text})
+					func_fail({error_text:"server returned error", error_detail:res.error_text});
 				} else {
 				 
 					// load this data into the local DB !
+					var totalToSave = res.results.length;
+					var numberSaved = 0;
 					$.each( res.results , function(index, value) {
-
 						var thisrec = window[table];
 						var recObject = new thisrec( value );
+						
+						// if record exists then add, otherwise update
+						//mydb.thedb[table].remove( recObject );
+						//mydb.thedb[table].add( recObject );
 						mydb.thedb[table].attach( recObject );
-console.log(recObject);
-console.log('=-====-==-=-==-==');
 					});	
-					
-					mydb.thedb.saveChanges( { success: function(r) { success(r); }, error: function(e) { fail(e); } } );	
 
+					mydb.thedb.saveChanges( { success: function(rdb) { func_success(++numberSaved, totalToSave, rdb); }, error: function(e) { func_fail(e); } } );	
+					
 				}
 				
 			}
@@ -46,7 +49,7 @@ console.log('=-====-==-=-==-==');
 							
 	}
 	
-}
+};
 
 
 
@@ -59,7 +62,8 @@ String.prototype.asDate = function() {
 	var day         = this.substring(8,10);
 
 	return new Date(year, month-1, day);
-}
+};
+
 /*
 Usage:
 	d = new Date();
@@ -74,7 +78,7 @@ Date.prototype.dateStrSQLFormat = function() {
    var ss = this.getSeconds().toString();
    return yyyy + '-' + (mm[1]?mm:"0"+mm[0]) + '-' + (dd[1]?dd:"0"+dd[0]) + " " +
    		  (hh[1]?hh:"0"+hh[0]) + ':' + (min[1]?min:"0"+min[0]) + ':' + (ss[1]?ss:"0"+ss[0]);
-}
+};
 
 
 
@@ -89,7 +93,7 @@ var MD5 = function (string) {
  
 	function RotateLeft(lValue, iShiftBits) {
 		return (lValue<<iShiftBits) | (lValue>>>(32-iShiftBits));
-	}
+	};
  
 	function AddUnsigned(lX,lY) {
 		var lX4,lY4,lX8,lY8,lResult;
@@ -110,7 +114,7 @@ var MD5 = function (string) {
 		} else {
 			return (lResult ^ lX8 ^ lY8);
 		}
- 	}
+ 	};
  
  	function F(x,y,z) { return (x & y) | ((~x) & z); }
  	function G(x,y,z) { return (x & z) | (y & (~z)); }
@@ -279,190 +283,11 @@ var MD5 = function (string) {
 		b=AddUnsigned(b,BB);
 		c=AddUnsigned(c,CC);
 		d=AddUnsigned(d,DD);
-	}
+	};
  
 	var temp = WordToHex(a)+WordToHex(b)+WordToHex(c)+WordToHex(d);
  
 	return temp.toLowerCase();
-}
-
-
-
-
-
-
-/******
-
-<html>
-	
-	<head>
-	
-		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-		
-		<script src="datefunctions.js"></script>
-		<script src="md5.js"></script>
-		
-		
-		<script>
-
-			// var api_url = 'http://localhost/soundwalks/wordpress/soundwalks/api/fetch.php';
-			var	api_url = 'http://162.243.232.219/soundwalks/api/fetch.php';
-			
-			
-			var app_key = 'soundwalks';
-			var app_key_suffix = 'rosetta';
-			var udid = 'replace_this_with_the_phone_udid_from_cordova';
-				
-		
-			// this lovely function from : http://stackoverflow.com/questions/1431094/how-do-i-replace-a-character-at-a-particular-index-in-javascript
-			String.prototype.replaceAt=function(index, character) {
-		    	return this.substr(0, index) + character + this.substr(index+character.length);
-		   	}
-		   	
-   
-			$(document).ready(function() {
-				
-				// just allow easy setting of the DTS value
-				$('#now').click(function() {
-					d = new Date();
-					utc_datetime = d.toISOString();
-					// looks like '2014-01-16T01:23:26.198Z', we want it to look like '2014-01-16 01:23:26'
-					// need to remove the chars after "." : 
-					utc_datetime = utc_datetime.substring(0, utc_datetime.indexOf('.'));
-					// and remove the T
-					utc_datetime = utc_datetime.replaceAt(10, " ");
-					// now show this UTC / GMT timestamp
-					$('#dts').val(utc_datetime);
-				});
-				$('#all').click(function() {
-					$('#dts').val('');
-				});
-				
-				
-				// advanced settings
-				$('#advanced').hide();
-
-				$('#show_advanced').click(function() {
-					if ($('#advanced').is(':visible'))
-						$('#advanced').slideUp();
-					else
-						$('#advanced').slideDown();
-				});
-				
-				
-				// do the API call
-				$('#api_call').click(function() {
-
-					var table = $('#table').val();
-					var password = MD5(app_key+udid+table+app_key_suffix);
-					
-					var params = '?table='+table+
-								 '&udid='+udid+
-								 '&application_key='+app_key+
-								 '&application_password='+password+
-								 '&dts='+encodeURIComponent($('#dts').val());
-						
-					// NB: Michael - you will use $.getJSON and callback=? rather than $().load as I've done here:			 
-					$('#api_result').load(api_url+params,
-						function(res) {
-							
-							if ($('#output').val()=='pretty') {
-								var p = syntaxHighlight($.parseJSON(res));
-								$('#api_result_pretty').html(p);
-								$('#api_result_pretty').show();
-								$('#api_result').hide();
-							} else {
-								$('#api_result_pretty').hide();
-								$('#api_result').show();							
-							}
-						}
-						);
-					
-				});
-				
-			});
-			
-			
-			
-			function syntaxHighlight(json) {
-			    if (typeof json != 'string') {
-			         json = JSON.stringify(json, null, 2);
-			    }
-			    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-			    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-			        var cls = 'number';
-			        if (/^"/.test(match)) {
-			            if (/:$/.test(match)) {
-			                cls = 'key';
-			            } else {
-			                cls = 'string';
-			            }
-			        } else if (/true|false/.test(match)) {
-			            cls = 'boolean';
-			        } else if (/null/.test(match)) {
-			            cls = 'null';
-			        }
-			        return '<span class="' + cls + '">' + match + '</span>';
-			    });
-			}
-			
-		</script>
-		
-		<style>
-			
-			pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-			.string { color: green; }
-			.number { color: darkorange; }
-			.boolean { color: blue; }
-			.null { color: magenta; }
-			.key { color: red; }
-			
-			
-		</style>
-
-	</head>
-	
-	
-	<body>
-		
-		<h1>Soundwalks API client</h1>
-		
-		
-		Table: <select id="table">
-			<option value="sw_area">sw_area</option>
-			<option value="sw_area_image">sw_area_image</option>
-			<option value="sw_sound_walk">sw_sound_walk</option>
-			<option value="sw_sound_walk_image">sw_sound_walk_image</option>
-			<option value="sw_hot_spot">sw_hot_spot</option>
-			<option value="sw_info">sw_info</option>
-			<option value="sw_info_image">sw_info_image</option>
-			<option value="sw_sponsor">sw_sponsor</option>
-		</select>
-		<button id="api_call">API Call</button>
-		
-		<span id="show_advanced"><small><a href="#">advanced</a></small></span>
-		<div id="advanced">
-			<br/>
-			DTS (UTC): <input id="dts" size="30" placeholder="Greenwich Mean Time"></input> 
-			<button id="now">Now (UTC)</button>
-			<button id="all">Forever</button>
-			<br/>
-			Output: <select id="output">
-				<option value="raw">raw</option>	
-				<option value="pretty" selected>pretty</option>
-			</select>	
-			<br/>
-		</div>
-		
-		<div id="api_result"></div>
-		<pre><div id="api_result_pretty"></div></pre>
-		
-	</body>
-	
-</html>
-
-******/
-
+};
 
 

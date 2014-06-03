@@ -1,0 +1,86 @@
+
+<!-- I found it very difficult to find complete working JayData examples -  -->   
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+<script src="jaydata-1.3.6/jaydata.min.js"></script>
+
+
+
+
+
+<script>
+
+
+$data.Entity.extend("Employee", {
+	Id: { type: "int", key: true, computed: true },
+	FirstName: { type: "string", required: true },
+	LastName: { type: "string" }
+});
+
+$data.EntityContext.extend("MyDB", {
+	Employee: { type: $data.EntitySet, elementType: Employee }
+});
+
+
+    
+
+var thedb = new MyDB("anotherDBName");
+
+function localdbconnect(okFunction) {
+		
+		thedb.onReady(function(){
+		  //access data after the context has been initialized
+		  okFunction('ok');
+		});
+}
+	
+
+function dbready(yes) {
+	if (yes!='ok') alert('db init failed!');
+	else {
+		
+		$('#add').click(function() {
+			// add one
+
+			var emp = new Employee({ FirstName: $('#current').val() });
+			thedb.Employee.add(emp);
+			thedb.saveChanges();
+			
+			$('#list').click();
+		});
+		
+		
+		$('#list').click(function() {
+			
+			// empty
+			$('#output').html('');
+			
+			// list all
+			thedb.Employee.forEach( function(result) {
+				//console.log(result);
+				$('#output').append(result.FirstName+'<br/>');
+			});
+			
+		});
+		
+		$('#list').click();
+		
+	}
+}
+
+
+</script>
+
+
+<body onload="localdbconnect(dbready);">
+	
+
+	<input id="current" type="text"/> <button id="add">Add</button> 
+	<button id="list" style="display:none;">List</button>
+	
+	<div id="output"></div>  
+	  
+</body>
+

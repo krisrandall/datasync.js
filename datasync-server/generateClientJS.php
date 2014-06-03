@@ -130,5 +130,12 @@ var mydb = {
 
 
 
+// assume jQuery - init DB once page is loaded
+$(document).ready(function() {
+	
+	mydb.thedb.onReady( function() { / * stuff to do when the DB is ready * / } );
+	
+});
+
 </pre>
 

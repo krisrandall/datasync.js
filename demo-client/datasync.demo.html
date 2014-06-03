@@ -5,30 +5,40 @@
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
 		
-		<script src="jaydata-1.3.6/jaydata.min.js"></script>
+		<script src="jaydata-1.3.6/jaydata.js"></script>
 		<script src="../datasync-client/datasync.js"></script>
 		<script src="../datasync-client/mydb.js"></script>
 		
 		<script>
 			
-			function yes_func(res) {
-				$('#results').html('');
-				mydb.thedb['t5_checklists'].forEach( function(result) {
+			function yes_func(haveSaved, of, res) {
+				
+alert(haveSaved+'\n'+of+'\n'+JSON.stringify(res));
+				
+				// wait until all are saved before processing
+				if (haveSaved == of) {
+	alert('now here!!');
 					
-					$('#results').append(result.checklist_id+': '+result.checklist_name+'<br/>');
-					
-					/* all fields * /
-					$.each( result, function (fld, val) {
-						$('#results').append(fld+' = '+val+'<br/>');
+					$('#results').html('');
+					mydb.thedb['t5_checklists'].forEach( function(result) {
+						
+		alert(result);				
+						$('#results').append(result.checklist_id+': '+result.checklist_name+'<br/>');
+						
+						/* all fields * /
+						$.each( result, function (fld, val) {
+							$('#results').append(fld+' = '+val+'<br/>');
+						});
+						*/
+						$('#results').append('<hr/>');
 					});
-					*/
-					$('#results').append('<hr/>');
-				});
-			}
+				}
+			};
 			
 			function no_func(err) {
-				alert(err.error_text+'\n'+err.error_detail);
-			}
+				alert('Error!\n\n'+JSON.stringify(err)+'\n\n');
+			};
+			
 		</script>
 	</head>
 
@@ -36,6 +46,8 @@
 	<body>
 		
 		<button onclick="mydb.fetch('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
+		
+		<button onclick="mydb.thedb['t5_checklists'].forEach( function(rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges(); ">Remove All</button>
 		
 		<div id="results">test</div>
 		
