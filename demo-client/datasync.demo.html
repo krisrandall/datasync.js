@@ -5,6 +5,7 @@
 		<script src="../datasync-client/libs/jquery/jquery.js"></script>
 		<script src="../datasync-client/libs/underscore/underscore.js"></script>
 		<script src="../datasync-client/libs/jaydata/jaydata.js"></script>
+		<script src="../datasync-client/libs/helperlib.js"></script>
 		<script src="../datasync-client/datasync.js"></script>
 		<script src="../datasync-client/mydb.js"></script>
 		
@@ -44,10 +45,11 @@ alert(haveSaved+'\n'+of+'\n'+JSON.stringify(res));
 
 	<body>
 		
-		<button onclick="mydb.fetch('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
+		<button onclick="datasync.fetchFromServer('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
 		
 		<button onclick="mydb.thedb['t5_checklists'].forEach( function(rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges(); ">Remove All</button>
 		
+		<button onclick="datasync.setLastUpdated('now');">Set the local DB as being up-to-date</button>
 		<div id="results">test</div>
 		
 	</body>

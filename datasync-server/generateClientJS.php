@@ -45,7 +45,8 @@ $(document).ready(function() {
 // the JayData Database
 
 $data.Entity.extend("control", {
-	id: { type: "int", key: true },
+	id: { type: "int", key: true }, /* only one record with id=1 */
+	DBVersion: { type: "text" },
 	lastUpdatedDTS: { type: Date }
 });
 <?php
@@ -55,14 +56,12 @@ $data.Entity.extend("control", {
 
 foreach($client_tables as $t) {
 	
-	// we make the assumption here that a MySQL table field which has auto increment set
-	// is the key field, and we set key: true in the client DB, to force uniquiness restraints
-	$auto_inc_extra = ', key: true ';
 
 	// each table in the local DB has it's own local_id also
 	
 	echo '	
-$data.Entity.extend("'.$t.'", { ';
+$data.Entity.extend("'.$t.'", {
+	local_id: { type: "int", key: true, computed: true }, ';
 			
 	$sql = "SHOW COLUMNS FROM $t";
 	$res = $db->query($sql) or die('mysqli error');
@@ -90,8 +89,6 @@ $data.Entity.extend("'.$t.'", { ';
 			default:			$type = $type;		break;
 		}
 		
-		
-		$extra1 = ( (stristr($rec['Extra'],'auto_increment'))?$auto_inc_extra:'' );
 		
 		echo "
 	$field: { type: \"$type\" $extra1}";
@@ -130,48 +127,17 @@ echo '
 
 var mydb = {
 	
+	version : '1.0', /* this should come from the API - future enhancement */
+	
 	app_url : '<?php echo "http://". $_SERVER['SERVER_NAME'] . dirname($_SERVER['REQUEST_URI']); ?>',
 	app_key : '<?php echo APP_NAME; ?>',
 	app_key_suffix : '<?php echo APP_SECRET_KEY; ?>',
 	
-	thedb : new MyDB("<?php echo APP_NAME; ?>"),
+	thedb : new MyDB("<?php echo APP_NAME; ?>") 
 	
-	fetch : function (table, where, success, fail) {
-		datasync.fetchFromServer (this, table, where, success, fail);
-	},
-	
-	store : function (table, where, success, fail) {
-		datasync.store (this, table, where, success, fail);
-	}
 };
 
 
-
-
-// This structure keeps track of the current DB state
-var dataHolder = [
-<?php
-$first = true;
-foreach($client_tables as $t) {
-	
-	if ($first) {
-		$first = false;
-	} else {
-		echo ',';
-	}
-			
-	echo "
-    {
-        tableName:  '$t',
-        table:      mydb.thedb.$t,
-        data:       null,
-        state:      'empty'     // empty, downloaded, failed, completed
-    }";
-}
-?>
-
-
-];
 
 </pre>
 

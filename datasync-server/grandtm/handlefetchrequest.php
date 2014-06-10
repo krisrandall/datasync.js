@@ -84,10 +84,7 @@ if ($success) {
 	$results['error'] = false;
 	$results['results'] = array();
 
-	$local_id = 0;
 	while($row=$res->fetch_assoc()) {
-
-		$row['local_id'] = $local_id++;
 
 		// remove /'s
 		foreach ($row as $i=>$v) {
