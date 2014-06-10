@@ -11,29 +11,17 @@
 		
 		<script>
 			
-			function yes_func(haveSaved, of, res) {
-				
-alert(haveSaved+'\n'+of+'\n'+JSON.stringify(res));
-				
-				// wait until all are saved before processing
-				if (haveSaved == of) {
-	alert('now here!!');
-					
-					$('#results').html('');
-					mydb.thedb['t5_checklists'].forEach( function(result) {
-						
-		alert(result);				
-						$('#results').append(result.checklist_id+': '+result.checklist_name+'<br/>');
-						
-						/* all fields * /
-						$.each( result, function (fld, val) {
-							$('#results').append(fld+' = '+val+'<br/>');
-						});
-						*/
-						$('#results').append('<hr/>');
-					});
-				}
+			function yes_func() {
+
+				// display the id and name of all these records
+				$('#results').html('');
+				mydb.thedb['t5_checklists'].forEach( function(result) {
+					$('#results').append(result.id+': '+result.checklist_name+'<br/>');
+					$('#results').append('<hr/>');
+				});
+
 			};
+			
 			
 			function no_func(err) {
 				alert('Error!\n\n'+JSON.stringify(err)+'\n\n');

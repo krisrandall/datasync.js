@@ -34,31 +34,31 @@ var datasync = {
 				if (data.error!==false) {
 					// the server API returned an error
 					func_fail({code:40,text:'error from cloud',details:data});
-				} else if (data.results.length>0){
+				} else if (data.results.length===0){
 					// successful call to server, but no records returned
 					func_success();
 				} else {
-					// loop through all records and write to the DB - func_success called once all written
-					data['toSave']=data.results.length;
-					data['saved']=0;
-					_.each(data.results, function(value, key, list) {
-						writeToDB( mydb.thedb[table], value, data, func_success, func_fail ); 
-					});					
+
+					// first REMOVE ALL records that we have been sent
+					$.each(data.results, function(record_form_server) {
+						mydb.thedb[table].remove(record_form_server); // remove the local copy that is
+					});
+					
+					// now add them all back in, unless they have the del flag set 
+					// KR: experimenting with _underscore
+					var updatedRecs = _.filter(data.results, function(record) { return record.del === '0'; } );
+			    	_.each(updatedRecs, function (record) { record.del = false;	/* convert del to boolean */ });
+    				mydb.thedb[table].addMany(updatedRecs);    			 
+
+					// save the changes and call the success function
+					mydb.thedb.saveChanges().then(func_success());
+								
 				}
 			})
 			.fail ( function (jqXHR, textStatus, errorThrown) {
 				dataHolder.state = 'failed';
 				func_fail({code:10,text:'JSON error on fetch',details:[jqXHR, textStatus, errorThrown]});
 			});
-	},
-	
-	writeToDB : function ( table, record, dataStruct, func_success, func_fail ) {
-	
-		
-	},
-	
-	writeToDBSuccess : function ( dataStruct, func_success, func_fail ) {
-		
 	},
 	
 		 
@@ -84,42 +84,7 @@ var datasync = {
 		});
 	}
 
-/*
- * first good example : http://jaydata.org/forum/viewtopic.php?f=3&t=325
- 
- 	fucking jayData !
- 	
-  $("#syncAppbtn").click(function () {
-        var rowsToProcess = 0, rowsProcessed = 0;
-        $.getJSON("http://www.json-generator.com/j/bMeLdrhCGa?indent=4", function (result) { //
-            rowsToProcess = result.length;
-            $.each(result, function (i, field) {
-                var existingPatients = Database.Test.filter("Id", "==", field.Id).toArray();
-                existingPatients.then(function (result) {
-                    var patientToUpdate = Database.Test.attachOrGet({ Id: field.Id });
-                    if (result.length == 0) // not found. Let's add it
-                    {
-                        patientToUpdate.name = field.name;
-                        Database.Test.add(patientToUpdate);
-                    }
-                    else
-                    {
-                        //update
-                    }
-                    rowsProcessed++;
-                    if (rowsProcessed == rowsToProcess) {
-                        Database.saveChanges({
-                            success: function (db) {
-                                alert("Sync Complete");
-                            }
-                        });
-                    }
-                })
-            });
-        });
-    });
-    
- */
+
 };
 
 

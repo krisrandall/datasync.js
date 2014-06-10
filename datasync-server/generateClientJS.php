@@ -67,16 +67,22 @@ $data.Entity.extend("'.$t.'", {
 	$res = $db->query($sql) or die('mysqli error');
 	$first = true;
 	while ($rec = $res->fetch_assoc()) {
-		
-		if ($first) {
-			$first = false;
-		} else {
-			echo ',';
-		}
 
 		$field = $rec['Field'];
 		$type = explode('(', $rec['Type']);
 		$type = $type[0];
+		
+		
+		if ($first) {
+			$first = false;
+			// Rename first field to "id"
+			$field = "id";
+		} else {
+			// comma after previous field
+			echo ',';
+		}
+		
+		
 		switch($type) {
 			case 'varchar':		$type = 'text';		break;
 			case 'tinyint':		$type = 'bool';		break; // this is the only thing i use tinyints for
@@ -88,6 +94,8 @@ $data.Entity.extend("'.$t.'", {
 			
 			default:			$type = $type;		break;
 		}
+		
+		
 		
 		
 		echo "

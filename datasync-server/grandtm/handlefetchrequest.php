@@ -85,10 +85,19 @@ if ($success) {
 	$results['results'] = array();
 
 	while($row=$res->fetch_assoc()) {
-
-		// remove /'s
+		
+		$first = true;	
 		foreach ($row as $i=>$v) {
-			$row[$i] = stripslashes($v);
+			// assume the first field is the auto-increment integer key,
+			// and rename it to 'id'
+			if ($first) {
+				$row['id'] = $row[$i];
+				unset($row[$i]);
+				$first = false;
+			} else {
+				// remove /'s	
+				$row[$i] = stripslashes($v);
+			}
 		}
 		
 		$results['results'][] = $row;
