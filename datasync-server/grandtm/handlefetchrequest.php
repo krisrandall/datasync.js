@@ -84,12 +84,10 @@ if ($success) {
 	$results['error'] = false;
 	$results['results'] = array();
 
+	$local_id = 0;
 	while($row=$res->fetch_assoc()) {
-		// NB: rename first table field to 'id' 
-		if ($first_key!='id') {
-			$row['id'] = $row[$first_key];
-			unset($row[$first_key]);
-		}
+
+		$row['local_id'] = $local_id++;
 
 		// remove /'s
 		foreach ($row as $i=>$v) {

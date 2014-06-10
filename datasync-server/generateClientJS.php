@@ -27,6 +27,27 @@ $client_tables = array_merge( $fetchable_tables , $storeable_tables );
  *
 **/
 
+
+'use strict';
+
+
+
+// Assume jQuery - this function is the hook where you start your app after the DB is ready
+$(document).ready(function() {
+	
+	mydb.thedb.onReady( function() { / * stuff to do when the DB is ready * / } );
+	
+});
+
+
+
+
+// the JayData Database
+
+$data.Entity.extend("control", {
+	id: { type: "int", key: true },
+	lastUpdatedDTS: { type: Date }
+});
 <?php
 
 // for each of the server-side tables we need, create JayData client equalivalents
@@ -34,18 +55,14 @@ $client_tables = array_merge( $fetchable_tables , $storeable_tables );
 
 foreach($client_tables as $t) {
 	
-	// if the table is a storeable table it means it gets written on the client, and
-	// auto_increment fields need to carry over;
-	// if the table is only a fetchable table then the "auto" id's come from the server,
-	// ie. no need to have the auto_increment behaviour on the client
-	if (in_array($t, $storeable_tables)) {
-		$auto_inc_extra = ', key: true, computed: true ';
-	} else {
-		$auto_inc_extra = ', key: true ';
-	}
+	// we make the assumption here that a MySQL table field which has auto increment set
+	// is the key field, and we set key: true in the client DB, to force uniquiness restraints
+	$auto_inc_extra = ', key: true ';
 
+	// each table in the local DB has it's own local_id also
+	
 	echo '	
-$data.Entity.extend("'.$t.'", {';
+$data.Entity.extend("'.$t.'", { ';
 			
 	$sql = "SHOW COLUMNS FROM $t";
 	$res = $db->query($sql) or die('mysqli error');
@@ -120,22 +137,42 @@ var mydb = {
 	thedb : new MyDB("<?php echo APP_NAME; ?>"),
 	
 	fetch : function (table, where, success, fail) {
-		datasync.fetch (this, table, where, success, fail);
+		datasync.fetchFromServer (this, table, where, success, fail);
 	},
 	
 	store : function (table, where, success, fail) {
 		datasync.store (this, table, where, success, fail);
 	}
+};
+
+
+
+
+// This structure keeps track of the current DB state
+var dataHolder = [
+<?php
+$first = true;
+foreach($client_tables as $t) {
+	
+	if ($first) {
+		$first = false;
+	} else {
+		echo ',';
+	}
+			
+	echo "
+    {
+        tableName:  '$t',
+        table:      mydb.thedb.$t,
+        data:       null,
+        state:      'empty'     // empty, downloaded, failed, completed
+    }";
 }
+?>
 
 
-
-// assume jQuery - init DB once page is loaded
-$(document).ready(function() {
-	
-	mydb.thedb.onReady( function() { / * stuff to do when the DB is ready * / } );
-	
-});
+];
 
 </pre>
+
 

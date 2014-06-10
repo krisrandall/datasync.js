@@ -36,8 +36,8 @@ var datasync = {
 						
 						// if record exists then add, otherwise update
 						//mydb.thedb[table].remove( recObject );
-						//mydb.thedb[table].add( recObject );
-						mydb.thedb[table].attach( recObject );
+						mydb.thedb[table].add( recObject );
+						//mydb.thedb[table].attach( recObject );
 					});	
 
 					mydb.thedb.saveChanges( { success: function(rdb) { func_success(++numberSaved, totalToSave, rdb); }, error: function(e) { func_fail(e); } } );	
