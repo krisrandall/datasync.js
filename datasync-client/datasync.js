@@ -4,7 +4,8 @@
 
 
 var datasync = {
-	
+
+
 	/*
 	 * The write part of data sync flows like this :
 	 * 
@@ -21,21 +22,20 @@ var datasync = {
 		
 		var password = MD5(mydb['app_key']+udid+table+mydb['app_key_suffix']);
 		
-		var params = '?table='+table+
-					 '&udid='+udid+
-					 '&application_key='+mydb['app_key']+
-					 '&application_password='+password+
-					 '&where='+encodeURIComponent(where) +
-					 '&callback=?';
+		var params = {'table':table,
+					 'udid':udid,
+					 'application_key':mydb['app_key'],
+					 'application_password':password,
+					 'where':encodeURIComponent(where) };
 			
-		$.getJSON(mydb['app_url']+'/fetch.php'+params)
+		$.getJSON(mydb['app_url']+'/fetch.php?callback=?', params)
 			.done( function ( data ) {
 				if (data.error!==false) {
 					// the server API returned an error
 					func_fail({code:40,text:'error from cloud',details:data});
 				} else if (data.results.length===0){
 					// successful call to server, but no records returned
-					func_success();
+					func_success(0);
 				} else {
 					// get from the DB all the records with the id's we have been sent
 					var fetched_ids = _.pluck(data.results, "id");
@@ -50,7 +50,7 @@ var datasync = {
 				    	_.each(updatedRecs, function (record) { record.del = false;	/* convert del to boolean */ });
 	    				mydb.thedb[table].addMany(updatedRecs);    			 
 						// save the changes and call the success function
-						mydb.thedb.saveChanges().then(func_success());
+						mydb.thedb.saveChanges().then(func_success(fetched_ids.length));
 					});			
 				}
 			})

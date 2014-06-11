@@ -11,8 +11,10 @@
 		
 		<script>
 			
-			function yes_func() {
+			function yes_func(how_many) {
 
+				// alert('fetched '+how_many+' records');
+				
 				// display the id and name of all these records
 				$('#results').html('');
 				mydb.thedb['t5_checklists'].forEach( function(result) {
@@ -35,7 +37,7 @@
 
 	<body>
 		
-		<button onclick="datasync.fetchFromServer('t5_checklists', ' t5code = \'D21UM\'', yes_func, no_func);">Fetch Table</button>	
+		<button onclick="datasync.fetchFromServer('t5_checklists', ' t5code > \'\'', yes_func, no_func);">Fetch Table</button>	
 		
 		<button onclick="mydb.thedb['t5_checklists'].toArray().then ( function(result) { $.each(result, function(i, rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges();   $('#results').html(''); }); ">Remove All</button>
 		
