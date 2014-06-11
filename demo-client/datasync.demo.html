@@ -16,7 +16,7 @@
 				// display the id and name of all these records
 				$('#results').html('');
 				mydb.thedb['t5_checklists'].forEach( function(result) {
-					$('#results').append(result.id+': '+result.checklist_name+'<br/>');
+					$('#results').append(result.id+': ['+result.t5code+'] '+result.checklist_name+'<br/>');
 					$('#results').append('<hr/>');
 				});
 
@@ -27,13 +27,15 @@
 				alert('Error!\n\n'+JSON.stringify(err)+'\n\n');
 			};
 			
+			$(document).on('datasync_ready', yes_func ); // run the yes_func() on startup, it lists all existing records
+			
 		</script>
 	</head>
 
 
 	<body>
 		
-		<button onclick="datasync.fetchFromServer('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
+		<button onclick="datasync.fetchFromServer('t5_checklists', ' t5code = \'D21UM\'', yes_func, no_func);">Fetch Table</button>	
 		
 		<button onclick="mydb.thedb['t5_checklists'].toArray().then ( function(result) { $.each(result, function(i, rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges();   $('#results').html(''); }); ">Remove All</button>
 		

@@ -74,38 +74,43 @@ elseif (!isset($table)) {
 
 if ($success) {
 
-	$res = $db->query("
-				SELECT * FROM `{$grandtm_config['table']}`
-				WHERE {$grandtm_config['where_condition']}
-				");
-
-				
-	$results = array();
-	$results['error'] = false;
-	$results['results'] = array();
-
-	while($row=$res->fetch_assoc()) {
-		
-		$first = true;	
-		foreach ($row as $i=>$v) {
-			// assume the first field is the auto-increment integer key,
-			// and rename it to 'id'
-			if ($first) {
-				$row['id'] = $row[$i];
-				unset($row[$i]);
-				$first = false;
-			} else {
-				// remove /'s	
-				$row[$i] = stripslashes($v);
-			}
-		}
-		
-		$results['results'][] = $row;
+	try {
+		$res = $db->query("
+					SELECT * FROM `{$grandtm_config['table']}`
+					WHERE {$grandtm_config['where_condition']}
+					");
+	} catch(Exception $e) {
+		$json_result = json_encode(array('error'=>true,'error_text'=>'query error','mysqli error'=>$db->error));
+		$fail = true;
 	}
 	
+	if (!$fail)  {
+		$results = array();
+		$results['error'] = false;
+		$results['results'] = array();
 	
-	$json_result = json_encode($results);
-	
+		while($row=$res->fetch_assoc()) {
+			
+			$first = true;	
+			foreach ($row as $i=>$v) {
+				// assume the first field is the auto-increment integer key,
+				// and rename it to 'id'
+				if ($first) {
+					$row['id'] = $row[$i];
+					unset($row[$i]);
+					$first = false;
+				} else {
+					// remove /'s	
+					$row[$i] = stripslashes($v);
+				}
+			}
+			
+			$results['results'][] = $row;
+		}
+		
+		
+		$json_result = json_encode($results);		
+	}
 }
 else {
 	$json_result = json_encode(array('error'=>true,'error_text'=>$error_text));

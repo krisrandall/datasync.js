@@ -25,8 +25,7 @@ var datasync = {
 					 '&udid='+udid+
 					 '&application_key='+mydb['app_key']+
 					 '&application_password='+password+
-					 '&dts='+encodeURIComponent($('#dts').val()) +
-					 '&where='+where +
+					 '&where='+encodeURIComponent(where) +
 					 '&callback=?';
 			
 		$.getJSON(mydb['app_url']+'/fetch.php'+params)
@@ -38,33 +37,25 @@ var datasync = {
 					// successful call to server, but no records returned
 					func_success();
 				} else {
-
-					
+					// get from the DB all the records with the id's we have been sent
 					var fetched_ids = _.pluck(data.results, "id");
-
 					var allRecs = mydb.thedb[table].filter(function(record) { return record.id in this; }, fetched_ids).toArray();
-					
 					allRecs.then(function(the_records) {				
-						// first REMOVE ALL records that we have been sent
+						// first REMOVE ALL records that we have been sent (if they already exist)
 						the_records.forEach( function(record) { 
 		               		mydb.thedb[table].remove(record); 
 		           		});
-						
 						// now add them all back in, unless they have the del flag set 
-						// KR: experimenting with _underscore
 						var updatedRecs = _.filter(data.results, function(record) { return record.del === '0'; } );
 				    	_.each(updatedRecs, function (record) { record.del = false;	/* convert del to boolean */ });
 	    				mydb.thedb[table].addMany(updatedRecs);    			 
-	
 						// save the changes and call the success function
 						mydb.thedb.saveChanges().then(func_success());
-					});
-						
-								
+					});			
 				}
 			})
 			.fail ( function (jqXHR, textStatus, errorThrown) {
-				dataHolder.state = 'failed';
+				// json call failed
 				func_fail({code:10,text:'JSON error on fetch',details:[jqXHR, textStatus, errorThrown]});
 			});
 	},

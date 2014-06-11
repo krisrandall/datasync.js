@@ -34,20 +34,20 @@ $client_tables = array_merge( $fetchable_tables , $storeable_tables );
 
 // Assume jQuery - this function is the hook where you start your app after the DB is ready
 $(document).ready(function() {
-	
-	mydb.thedb.onReady( function() { / * stuff to do when the DB is ready * / } );
-	
+	mydb.thedb.onReady( function() { 
+		var event = new CustomEvent('datasync_ready');
+		$(document)[0].dispatchEvent(event);
+	} );
 });
-
 
 
 
 // the JayData Database
 
 $data.Entity.extend("control", {
-	id: { type: "int", key: true }, /* only one record with id=1 */
+	id: { type: "int", key: true, computed: true }, /* only one record with id=1 */
 	DBVersion: { type: "text" },
-	lastUpdatedDTS: { type: Date }
+	lastUpdatedDTS: { type: "text" }
 });
 <?php
 
@@ -114,7 +114,8 @@ $data.Entity.extend("'.$t.'", {
 
 echo '
 
-$data.EntityContext.extend("MyDB", { ';
+$data.EntityContext.extend("MyDB", {
+	control: { type: $data.EntitySet, elementType: control },	 ';
 $first = true;
 foreach($client_tables as $t) {
 	if ($first) {
