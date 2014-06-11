@@ -39,19 +39,27 @@ var datasync = {
 					func_success();
 				} else {
 
-					// first REMOVE ALL records that we have been sent
-					$.each(data.results, function(record_form_server) {
-						mydb.thedb[table].remove(record_form_server); // remove the local copy that is
-					});
 					
-					// now add them all back in, unless they have the del flag set 
-					// KR: experimenting with _underscore
-					var updatedRecs = _.filter(data.results, function(record) { return record.del === '0'; } );
-			    	_.each(updatedRecs, function (record) { record.del = false;	/* convert del to boolean */ });
-    				mydb.thedb[table].addMany(updatedRecs);    			 
+					var fetched_ids = _.pluck(data.results, "id");
 
-					// save the changes and call the success function
-					mydb.thedb.saveChanges().then(func_success());
+					var allRecs = mydb.thedb[table].filter(function(record) { return record.id in this; }, fetched_ids).toArray();
+					
+					allRecs.then(function(the_records) {				
+						// first REMOVE ALL records that we have been sent
+						the_records.forEach( function(record) { 
+		               		mydb.thedb[table].remove(record); 
+		           		});
+						
+						// now add them all back in, unless they have the del flag set 
+						// KR: experimenting with _underscore
+						var updatedRecs = _.filter(data.results, function(record) { return record.del === '0'; } );
+				    	_.each(updatedRecs, function (record) { record.del = false;	/* convert del to boolean */ });
+	    				mydb.thedb[table].addMany(updatedRecs);    			 
+	
+						// save the changes and call the success function
+						mydb.thedb.saveChanges().then(func_success());
+					});
+						
 								
 				}
 			})

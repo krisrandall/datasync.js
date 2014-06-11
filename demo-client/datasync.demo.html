@@ -35,9 +35,10 @@
 		
 		<button onclick="datasync.fetchFromServer('t5_checklists', '', yes_func, no_func);">Fetch Table</button>	
 		
-		<button onclick="mydb.thedb['t5_checklists'].forEach( function(rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges(); ">Remove All</button>
+		<button onclick="mydb.thedb['t5_checklists'].toArray().then ( function(result) { $.each(result, function(i, rec) { mydb.thedb['t5_checklists'].remove(rec); }); mydb.thedb.saveChanges();   $('#results').html(''); }); ">Remove All</button>
 		
 		<button onclick="datasync.setLastUpdated('now');">Set the local DB as being up-to-date</button>
+		
 		<div id="results">test</div>
 		
 	</body>
