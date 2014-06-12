@@ -107,8 +107,12 @@ var datasync = {
 			$.getJSON(mydb['app_url']+'/store.php?callback=?', params)
 				.done(function( response ) {
 					
-					// TO DO !!! AND THE SERVER END TOO !!
-					alert('back from server : '+JSON.stringify(response));
+					if (response.error!==false) {
+						// the server API returned an error
+						func_fail({code:240,text:'error from cloud',details:response});
+					} else {
+						func_success(response.num_saved);
+					}
 					
 				})
 				.fail ( function (jqXHR, textStatus, errorThrown) {
