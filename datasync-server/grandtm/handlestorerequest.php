@@ -42,8 +42,6 @@ function get_client_ip() {
 if (!isset($grandtm_config)) die('You must set $grandtm_config prior to handlerequest.php');
 
 
-if (!isset($grandtm_config['where_condition'])) $grandtm_config['where_condition'] = '1';
-
 
 // validate that the application key sent is correct and that the password is too
 
@@ -67,53 +65,52 @@ elseif (!isset($table)) {
 	$success = false;
 	$error_text = 'Table was not specified';
 }
-elseif (!isset($action)) {
+elseif (!isset($data)) {
 	$success = false;
-	$error_text = 'Action was not specified';
+	$error_text = 'No store data sent';
 }
-
 
 if ($success) {
 
-
-/***
- * 
- * TO DO TODO TO DO
- * 
- * 
- *
-  	need to determine insert structure and code that here !!!
- * 
- * 
-  
- 
-	$res = $db->query("
-				SELECT * FROM `{$grandtm_config['table']}`
-				WHERE {$grandtm_config['where_condition']}
-				");
-	$results = array();
-	$results['error'] = false;
-	$results['results'] = array();
+	$num_saved = 0;
+	$records_to_save = json_decode($data);
 	
-	while($row=$res->fetch_assoc()) {
-		// NB: rename first table field to 'id' 
-		if ($first_key!='id') {
-			$row['id'] = $row[$first_key];
-			unset($row[$first_key]);
-		}
+	
+	foreach($records_to_save as $rec_to_save) {
+		
+		if (!$fail) {
+			
+			$queryFlds = "";
+			foreach($rec_to_save as $field=>$val) {
+				
+				if ($queryFlds!='') $queryFlds .= ", ";
+				$queryFlds .= "`".$db->real_escape_string($field)."` = '".$db->real_escape_string($val)."'";
+	
+			}
+	
+			$queryStr = "INSERT INTO $table SET $queryFlds ON DUPLICATE KEY UPDATE $queryFlds ";
 
-		// remove /'s
-		foreach ($row as $i=>$v) {
-			$row[$i] = stripslashes($v);
+			
+			try {		
+				$res = $db->query($queryStr);	
+				if (!$res) {
+					$fail = true;
+					$json_result = json_encode(array('error'=>true,'error_text'=>'save failed','mysqli error'=>$db->error));
+				}
+			} catch(Exception $e) {
+				$fail = true;
+				$json_result = json_encode(array('error'=>true,'error_text'=>'query error','mysqli error'=>$db->error));
+			}
+
+			if (!$fail) $num_saved++;
 		}
 		
-		$results['results'][] = $row;
 	}
+
 	
- */
- 	
-	$json_result = json_encode($results);
-	
+	if (!$fail)  {
+		$json_result = json_encode(array('error'=>false,'num_saved'=>$num_saved));
+	} 
 }
 else {
 	$json_result = json_encode(array('error'=>true,'error_text'=>$error_text));

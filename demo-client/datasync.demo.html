@@ -15,11 +15,18 @@
 
 				// alert('fetched '+how_many+' records');
 				
-				// display the id and name of all these records
-				$('#results').html('');
+				// display the id and name of all the checklists
+				$('#checklists').html('');
 				mydb.thedb['t5_checklists'].forEach( function(result) {
-					$('#results').append(result.id+': ['+result.t5code+'] '+result.checklist_name+'<br/>');
-					$('#results').append('<hr/>');
+					$('#checklists').append(result.id+': ['+result.t5code+'] '+result.checklist_name+'<br/>');
+					$('#checklists').append('<hr/>');
+				});
+				
+				// also list out all the reviews
+				$('#reviews').html('');
+				mydb.thedb['t5_reviews'].forEach( function(result) {
+					$('#reviews').append(result.id+': '+result.review_name+'<br/>');
+					$('#reviews').append('<hr/>');
 				});
 
 			};
@@ -30,6 +37,20 @@
 			};
 			
 			$(document).on('datasync_ready', yes_func ); // run the yes_func() on startup, it lists all existing records
+			
+			
+			function saveReviewLocally(reviewName) {
+				mydb.thedb['t5_reviews'].add( new t5_reviews({review_name : reviewName}) );
+				mydb.thedb.saveChanges(yes_func);
+			}
+			
+			function pushReviewsToServer() {
+				datasync.storeToServer('t5_reviews', '',
+						function() {
+							alert('saved ok - check the DB');
+						},
+						no_func);
+			}
 			
 		</script>
 	</head>
@@ -43,7 +64,16 @@
 		
 		<button onclick="datasync.setLastUpdated('now');">Set the local DB as being up-to-date</button>
 		
-		<div id="results">test</div>
+		<div id="checklists">checklists go here ...</div>
+		
+		<input id="review_name"/> <button onclick="saveReviewLocally($('#review_name').val());">Save Review Name Locally</button>
+		
+		<button onclick="pushReviewsToServer();">Push all reviews to server</button>
+
+		<button onclick="mydb.thedb['t5_reviews'].toArray().then ( function(result) { $.each(result, function(i, rec) { mydb.thedb['t5_reviews'].remove(rec); }); mydb.thedb.saveChanges();   $('#reviews').html(''); }); ">Remove All local reviews</button>
+
+		<div id="reviews">reviews go here ...</div>
+
 		
 	</body>
 	

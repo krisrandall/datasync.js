@@ -7,7 +7,7 @@ var datasync = {
 
 
 	/*
-	 * The write part of data sync flows like this :
+	 * The server to client part of data sync flows like this :
 	 * 
 	 * 		fetchFromServer()
 	 * 			|			------> errors [func_fail]
@@ -60,6 +60,69 @@ var datasync = {
 			});
 	},
 	
+
+	/*
+	 * The client to server part of data sync flows like this :
+	 * 
+	 * 		storeToServer()
+	 * 			|			------> errors [func_fail]
+	 * 			v
+	 * 		(user defined success function) [func_success]
+	 * 
+	 */
+	
+	storeToServer : function ( table, where, func_success, func_fail ) {
+
+		if (where=='') where = '1';
+		
+		// first fetch the records
+		var found_recs = mydb.thedb[table].filter(where).toArray();
+		found_recs.then(function(matching_data) {
+			
+			// remove "id" and "local_id" fields from matching_data
+			$.each(matching_data, function(i, obj) {
+				
+				//obj = {"local_id":8,"id":null,"review_name":"One","checklist_id":null,"account_id":null,"checklist_name":null,"t5code":null,"checklist_type":null,"checklist_createdDTS":null,"checklist_updatedDTS":null,"hazard_reporting_type":null,"submittedDTS":null,"submittedUDID":null,"submittedIP":null,"submittedName":null,"submittedPhoneKey":null};
+				obj = $.parseJSON(JSON.stringify(obj));
+							
+			    delete obj.local_id;
+			    delete obj.id;
+			    
+				matching_data[i] = obj;
+			    
+			});
+
+			var udid = '999999999'; // replace this with the UDID of the device
+			
+			var password = MD5(mydb['app_key']+udid+table+mydb['app_key_suffix']);
+			
+			var params = {'table':table,
+						 'udid':udid,
+						 'application_key':mydb['app_key'],
+						 'application_password':password,
+						 'data':JSON.stringify(matching_data),
+						  };
+
+				
+			$.getJSON(mydb['app_url']+'/store.php?callback=?', params)
+				.done(function( response ) {
+					
+					// TO DO !!! AND THE SERVER END TOO !!
+					alert('back from server : '+JSON.stringify(response));
+					
+				})
+				.fail ( function (jqXHR, textStatus, errorThrown) {
+					// json call failed
+					func_fail({code:210,text:'JSON error on store',details:[jqXHR, textStatus, errorThrown]});
+				});
+
+							
+		});
+
+
+	},
+	
+
 		 
 		 
 	setLastUpdated : function ( dts ) {
