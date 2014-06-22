@@ -1,7 +1,7 @@
 datasync.js
 ===========
 
-Easy syncronisation between local DB (JS) and server (MySQL, PHP)
+Easy syncronisation between local DB (JS, JayData) and server (PHP, MySQL)
 
 
 datasync.js works like this :
