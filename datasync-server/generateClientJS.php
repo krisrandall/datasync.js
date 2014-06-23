@@ -84,6 +84,9 @@ $data.Entity.extend("'.$t.'", {
 		
 		
 		switch($type) {
+			case 'datetime':
+			case 'date':
+			case 'longtext':
 			case 'varchar':		$type = 'text';		break;
 			case 'tinyint':		$type = 'bool';		break; // this is the only thing i use tinyints for
 			case 'smallint':
