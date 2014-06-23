@@ -1,5 +1,4 @@
 <?php
-// NB - DO NOT COMMIT - this is my own WIP config ...
 
 // ** App settings - You determine these when you create your app ** //
 
@@ -24,8 +23,6 @@ $fetchable_tables = array(  );
 // ** storeable_tables is a list of all tables that the client is allow to update ** //
 
 $storeable_tables = array(  );
-
-
 
 
 ?>
