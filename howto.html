@@ -58,9 +58,31 @@
 		<h2>A full datasync.js example</h2>
 		<p>
 			TO DO ...	
+			<br/>
+			what we will do here is make a live demo DB - not accessable via any external
+			mechanism, but we will show the tables here,
+			and then include a download bundle which includes datasync and a demo app,
+			actually, datasync.demo.html could be that demo app ....
+			it could be a simple list the data from the server,
+			and then we could do a really simple interface to update the data on the web too,
+			so they can see the changes happen ....
+			hmmmm.... but also not let them remove all data ... 
+			perhaps it is better that the web data be via some kind of feed,
+			even tweets that have the #datasync has tag mebe .. ??
+			<br/>
 		</p>
 		
-		
+		<h2>Why not OData?</h2>
+		<p>
+			A good question.<br/>
+			OData exists at the time of developing datasync.js, however it is not yet
+			mature.
+			For example there is not a read/write PHP/MySQL OData sever library 
+			available yet and I am dis-inclinded to write one myself.
+			In the future there is no reason why datasync.js could not be modified
+			to use OData as it's protocol (and no change would even be required to
+			the datasync.js API), but for now it uses it's own protocol.
+		</p>
 		
 		
 	</body>
