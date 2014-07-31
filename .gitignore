@@ -5,4 +5,10 @@
 # mac file in every directory
 .DS_Store
 
+# config files
+datasync-client/mydb.js
+datasync-server/config-take5.php
+howto.html
+notes_to_self.dont_commit
+
 
