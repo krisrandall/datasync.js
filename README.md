@@ -22,5 +22,5 @@ datasync.js is used like this :
 That's it!
 
 
-See http://krisrandall.github.io/ for more details.
+See http://krisrandall.github.io/datasync/ for more details.
 
